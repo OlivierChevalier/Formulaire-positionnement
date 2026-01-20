@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Positionnement - Commerce & Marketing</title>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        // Composants d'icônes simplifiés
+        const ChevronDown = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>;
+        const ChevronUp = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>;
+        const CheckCircle = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
+        const Award = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>;
+        const TrendingUp = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>;
+        const Mail = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>;
+        const Copy = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>;
+
+        const rawSections = [
+            {
+                title: "Informations Personnelles",
+                questions: [
+                    { id: "nom", label: "Nom complet", type: "text", required: true, points: 0 },
+                    { id: "email", label: "Email", type: "email", required: true, points: 0 },
+                    { id: "formation", label: "Formation actuelle/dernière obtenue", type: "text", required: true, points: 0 },
+                    { id: "experience", label: "Expérience professionnelle (stage, alternance, emploi)", type: "textarea", points: 0 }
+                ]
+            },
+            {
+                title: "Marketing Stratégique",
+                questions: [
+                    {
+                        id: "q1",
+                        label: "Quelle est la principale différence entre une stratégie de pénétration et une stratégie d'écrémage ?",
+                        type: "radio",
+                        options: [
+                            "Pénétration : prix bas pour gagner des parts de marché / Écrémage : prix élevé pour cibler un segment premium",
+                            "Pénétration : publicité intensive / Écrémage : bouche-à-oreille",
+                            "Pénétration : distribution sélective / Écrémage : distribution intensive",
+                            "Je ne sais pas"
+                        ],
+                        correctAnswer: "Pénétration : prix bas pour gagner des parts de marché / Écrémage : prix élevé pour cibler un segment premium",
+                        points: 3
+                    },
+                    {
+                        id: "q2",
+                        label: "Analysez ce cas : Une entreprise de cosmétiques veut lancer un nouveau produit anti-âge. Décrivez les 4 étapes clés de son plan marketing stratégique.",
+                        type: "textarea",
+                        placeholder: "Développez votre réponse (analyse de marché, segmentation, positionnement, mix marketing)...",
+                        keywords: ["segmentation", "ciblage", "positionnement", "mix", "analyse", "concurrence"],
+                        points: 5
+                    },
+                    {
+                        id: "q3",
+                        label: "Qu'est-ce que la matrice BCG (Boston Consulting Group) et à quoi sert-elle ?",
+                        type: "radio",
+                        options: [
+                            "Un outil d'analyse de portefeuille produits basé sur la part de marché et la croissance du marché",
+                            "Une méthode de segmentation client basée sur le comportement d'achat",
+                            "Un tableau de bord de suivi des ventes",
+                            "Je ne sais pas"
+                        ],
+                        correctAnswer: "Un outil d'analyse de portefeuille produits basé sur la part de marché et la croissance du marché",
+                        points: 3
+                    },
+                    {
+                        id: "q4",
+                        label: "Calculez le ROI (Return on Investment) : Une campagne marketing coûte 50 000€ et génère 200 000€ de revenus supplémentaires. Quel est le ROI en pourcentage ?",
+                        type: "radio",
+                        options: ["300%", "250%", "150%", "400%"],
+                        correctAnswer: "300%",
+                        points: 4
+                    }
+                ]
+            },
+            {
+                title: "Marketing Digital Avancé",
+                questions: [
+                    {
+                        id: "q5",
+                        label: "Quelle est la différence entre le SEO et le SEA ?",
+                        type: "radio",
+                        options: [
+                            "SEO : référencement naturel gratuit / SEA : référencement payant (Google Ads)",
+                            "SEO : réseaux sociaux / SEA : emailing",
+                            "SEO : pour mobile / SEA : pour desktop",
+                            "Je ne sais pas"
+                        ],
+                        correctAnswer: "SEO : référencement naturel gratuit / SEA : référencement payant (Google Ads)",
+                        points: 2
+                    },
+                    {
+                        id: "q6",
+                        label: "Qu'est-ce que le taux de conversion et comment le calculer ?",
+                        type: "radio",
+                        options: [
+                            "(Nombre de conversions / Nombre de visiteurs) × 100",
+                            "(Nombre de visiteurs / Nombre de conversions) × 100",
+                            "(Chiffre d'affaires / Nombre de visiteurs) × 100",
+                            "Je ne sais pas"
+                        ],
+                        correctAnswer: "(Nombre de conversions / Nombre de visiteurs) × 100",
+                        points: 3
+                    },
+                    {
+                        id: "q7",
+                        label: "Cas pratique : Vous gérez une campagne Facebook Ads avec un budget de 1000€. CTR = 2%, CPC = 0,50€. Combien de clics obtiendrez-vous ?",
+                        type: "radio",
+                        options: ["2000 clics", "1000 clics", "500 clics", "4000 clics"],
+                        correctAnswer: "2000 clics",
+                        points: 4
+                    },
+                    {
+                        id: "q8",
+                        label: "Expliquez ce qu'est le funnel de conversion (tunnel de conversion) et citez ses 4-5 étapes principales dans le e-commerce.",
+                        type: "textarea",
+                        placeholder: "Décrivez le funnel et ses étapes...",
+                        keywords: ["sensibilisation", "considération", "décision", "action", "fidélisation", "awareness", "consideration"],
+                        points: 5
+                    }
+                ]
+            },
+            {
+                title: "Gestion Financière et Commerce",
+                questions: [
+                    {
+                        id: "q9",
+                        label: "Calculez la marge brute : Prix de vente HT = 100€, Coût d'achat HT = 60€. Quelle est la marge brute en € et en % ?",
+                        type: "radio",
+                        options: ["40€ et 40%", "40€ et 66,67%", "60€ et 60%", "Je ne sais pas"],
+                        correctAnswer: "40€ et 40%",
+                        points: 3
+                    },
+                    {
+                        id: "q10",
+                        label: "Qu'est-ce que le BFR (Besoin en Fonds de Roulement) ?",
+                        type: "radio",
+                        options: [
+                            "La trésorerie nécessaire pour financer le décalage entre dépenses et encaissements",
+                            "Le budget annuel de l'entreprise",
+                            "Le bénéfice net de l'année",
+                            "Je ne sais pas"
+                        ],
+                        correctAnswer: "La trésorerie nécessaire pour financer le décalage entre dépenses et encaissements",
+                        points: 4
+                    },
+                    {
+                        id: "q11",
+                        label: "Dans une négociation commerciale B2B, quelles sont les 3 techniques de closing (conclusion) les plus efficaces ? Expliquez-en au moins une.",
+                        type: "textarea",
+                        placeholder: "Citez et expliquez des techniques de closing...",
+                        keywords: ["alternative", "urgence", "récapitulatif", "concession", "assumé", "question"],
+                        points: 5
+                    },
+                    {
+                        id: "q12",
+                        label: "Qu'est-ce que le seuil de rentabilité (point mort) ?",
+                        type: "radio",
+                        options: [
+                            "Le niveau de ventes où l'entreprise ne fait ni profit ni perte",
+                            "Le chiffre d'affaires maximum de l'entreprise",
+                            "Le niveau de stock optimal",
+                            "Je ne sais pas"
+                        ],
+                        correctAnswer: "Le niveau de ventes où l'entreprise ne fait ni profit ni perte",
+                        points: 3
+                    }
+                ]
+            },
+            {
+                title: "Analyse Stratégique Avancée",
+                questions: [
+                    {
+                        id: "q13",
+                        label: "Réalisez une mini-analyse SWOT pour Netflix en 2024. Identifiez 2 forces, 2 faiblesses, 2 opportunités et 2 menaces.",
+                        type: "textarea",
+                        placeholder: "Structurez votre réponse en SWOT...",
+                        keywords: ["force", "faiblesse", "opportunité", "menace", "concurrence", "contenu", "abonnés"],
+                        points: 6
+                    },
+                    {
+                        id: "q14",
+                        label: "Qu'est-ce que les 5 forces de Porter et à quoi servent-elles ?",
+                        type: "radio",
+                        options: [
+                            "Un modèle d'analyse de l'intensité concurrentielle d'un marché (nouveaux entrants, pouvoir clients/fournisseurs, substituts, rivalité)",
+                            "5 stratégies de croissance pour l'entreprise",
+                            "5 types de clients différents",
+                            "Je ne sais pas"
+                        ],
+                        correctAnswer: "Un modèle d'analyse de l'intensité concurrentielle d'un marché (nouveaux entrants, pouvoir clients/fournisseurs, substituts, rivalité)",
+                        points: 4
+                    },
+                    {
+                        id: "q15",
+                        label: "Quelle est la différence entre un avantage concurrentiel par les coûts et par la différenciation ? Donnez un exemple pour chaque.",
+                        type: "textarea",
+                        placeholder: "Expliquez avec des exemples concrets...",
+                        keywords: ["coût", "prix", "différenciation", "qualité", "innovation", "low-cost", "premium"],
+                        points: 5
+                    }
+                ]
+            },
+            {
+                title: "Comportement du Consommateur",
+                questions: [
+                    {
+                        id: "q16",
+                        label: "Qu'est-ce que la pyramide de Maslow et comment s'applique-t-elle au marketing ?",
+                        type: "radio",
+                        options: [
+                            "Une hiérarchie des besoins humains (physiologiques, sécurité, appartenance, estime, accomplissement) utilisée pour segmenter",
+                            "Une méthode de fixation des prix",
+                            "Un modèle de distribution",
+                            "Je ne sais pas"
+                        ],
+                        correctAnswer: "Une hiérarchie des besoins humains (physiologiques, sécurité, appartenance, estime, accomplissement) utilisée pour segmenter",
+                        points: 3
+                    },
+                    {
+                        id: "q17",
+                        label: "Expliquez le concept de 'biais cognitif' en marketing. Citez et expliquez 2 biais utilisés fréquemment (ex: ancrage, rareté, preuve sociale...).",
+                        type: "textarea",
+                        placeholder: "Définissez et donnez 2 exemples de biais cognitifs...",
+                        keywords: ["ancrage", "rareté", "preuve sociale", "autorité", "urgence", "réciprocité"],
+                        points: 5
+                    },
+                    {
+                        id: "q18",
+                        label: "Qu'est-ce que le 'Customer Lifetime Value' (CLV) ?",
+                        type: "radio",
+                        options: [
+                            "La valeur totale qu'un client rapporte à l'entreprise sur toute sa durée de relation",
+                            "Le coût d'acquisition d'un client",
+                            "Le nombre moyen d'achats par client",
+                            "Je ne sais pas"
+                        ],
+                        correctAnswer: "La valeur totale qu'un client rapporte à l'entreprise sur toute sa durée de relation",
+                        points: 4
+                    }
+                ]
+            },
+            {
+                title: "Cas Pratique Intégré",
+                questions: [
+                    {
+                        id: "q19",
+                        label: "CAS PRATIQUE : Vous êtes consultant(e) pour une startup qui vend des vêtements éco-responsables en ligne. Budget marketing annuel : 100 000€. Proposez une stratégie marketing complète : segmentation, positionnement, canaux, budget allocation, KPIs.",
+                        type: "textarea",
+                        placeholder: "Développez votre stratégie complète (minimum 200 mots)...",
+                        keywords: ["segmentation", "positionnement", "réseaux sociaux", "SEO", "influenceurs", "KPI", "budget", "éco", "durable"],
+                        points: 10
+                    },
+                    {
+                        id: "q20",
+                        label: "Quels sont les 3 KPIs (indicateurs de performance) les plus importants à suivre pour une activité e-commerce ?",
+                        type: "textarea",
+                        placeholder: "Citez 3 KPIs et expliquez pourquoi...",
+                        keywords: ["conversion", "panier", "acquisition", "CAC", "ROI", "trafic", "rétention"],
+                        points: 4
+                    }
+                ]
+            },
+            {
+                title: "Motivations et Vision",
+                questions: [
+                    {
+                        id: "q21",
+                        label: "Pourquoi souhaitez-vous intégrer une formation supérieure en commerce, marketing, management de la relation client ou gestion ? Quels sont vos objectifs d'apprentissage ?",
+                        type: "textarea",
+                        placeholder: "Expliquez vos motivations et objectifs...",
+                        required: true,
+                        points: 0
+                    },
+                    {
+                        id: "q22",
+                        label: "Quel domaine vous attire le plus ?",
+                        type: "radio",
+                        options: ["Marketing Stratégique", "Marketing Digital", "Commerce/Vente", "Gestion/Finance", "Entrepreneuriat"],
+                        points: 0
+                    },
+                    {
+                        id: "q23",
+                        label: "Décrivez un projet marketing/commercial que vous avez réalisé ou que vous aimeriez réaliser. Quels résultats attendez-vous ?",
+                        type: "textarea",
+                        placeholder: "Décrivez votre projet...",
+                        points: 0
+                    }
+                ]
+            }
+        ];
+
+        const PositionningForm = () => {
+            const [currentSection, setCurrentSection] = useState(0);
+            const [responses, setResponses] = useState({});
+            const [submitted, setSubmitted] = useState(false);
+            const [score, setScore] = useState(null);
+            const [copySuccess, setCopySuccess] = useState(false);
+
+            const [sections] = useState(() => {
+                const shuffle = (array) => {
+                    const newArray = [...array];
+                    for (let i = newArray.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+                    }
+                    return newArray;
+                };
+
+                return rawSections.map(section => ({
+                    ...section,
+                    questions: section.questions.map(q => {
+                        if (q.type === "radio" && q.options && q.points > 0) {
+                            return { ...q, options: shuffle(q.options) };
+                        }
+                        return q;
+                    })
+                }));
+            });
+
+            const calculateScore = () => {
+                let totalPoints = 0;
+                let earnedPoints = 0;
+                let details = {
+                    bySection: [],
+                    totalQuestions: 0,
+                    answeredQuestions: 0
+                };
+
+                sections.forEach((section) => {
+                    let sectionTotal = 0;
+                    let sectionEarned = 0;
+                    let sectionAnswered = 0;
+
+                    section.questions.forEach(question => {
+                        if (question.points > 0) {
+                            totalPoints += question.points;
+                            details.totalQuestions++;
+
+                            const answer = responses[question.id];
+                            if (answer && answer.length > 0) {
+                                details.answeredQuestions++;
+                                sectionAnswered++;
+
+                                if (question.correctAnswer) {
+                                    if (answer === question.correctAnswer) {
+                                        earnedPoints += question.points;
+                                        sectionEarned += question.points;
+                                    }
+                                } else if (question.keywords) {
+                                    const lowerAnswer = answer.toLowerCase();
+                                    const foundKeywords = question.keywords.filter(kw =>
+                                        lowerAnswer.includes(kw.toLowerCase())
+                                    );
+                                    const keywordScore = (foundKeywords.length / question.keywords.length) * question.points;
+                                    earnedPoints += keywordScore;
+                                    sectionEarned += keywordScore;
+                                }
+                            }
+                            sectionTotal += question.points;
+                        }
+                    });
+
+                    if (sectionTotal > 0) {
+                        details.bySection.push({
+                            name: section.title,
+                            earned: Math.round(sectionEarned * 10) / 10,
+                            total: sectionTotal,
+                            answered: sectionAnswered
+                        });
+                    }
+                });
+
+                const percentage = totalPoints > 0 ? (earnedPoints / totalPoints) * 100 : 0;
+                return {
+                    earned: Math.round(earnedPoints * 10) / 10,
+                    total: totalPoints,
+                    percentage: Math.round(percentage * 10) / 10,
+                    details,
+                    level: getLevel(percentage)
+                };
+            };
+
+            const getLevel = (percentage) => {
+                if (percentage >= 85) return { name: "Expert", color: "text-purple-600", bg: "bg-purple-100" };
+                if (percentage >= 70) return { name: "Avancé", color: "text-green-600", bg: "bg-green-100" };
+                if (percentage >= 50) return { name: "Intermédiaire", color: "text-blue-600", bg: "bg-blue-100" };
+                if (percentage >= 30) return { name: "Débutant+", color: "text-yellow-600", bg: "bg-yellow-100" };
+                return { name: "Débutant", color: "text-orange-600", bg: "bg-orange-100" };
+            };
+
+            const generateReportText = (scoreData) => {
+                return `
+=== QUESTIONNAIRE DE POSITIONNEMENT TITRES ===
+Date: ${new Date().toLocaleString('fr-FR')}
+
+--- INFORMATIONS CANDIDAT ---
+Nom: ${responses.nom || 'Non renseigné'}
+Email: ${responses.email || 'Non renseigné'}
+Formation: ${responses.formation || 'Non renseigné'}
+Expérience: ${responses.experience || 'Non renseigné'}
+
+--- RÉSULTATS ---
+Score global: ${scoreData.percentage}% (${scoreData.earned}/${scoreData.total} points)
+Niveau: ${scoreData.level.name}
+Questions répondues: ${scoreData.details.answeredQuestions}/${scoreData.details.totalQuestions}
+
+--- SCORES PAR SECTION ---
+${scoreData.details.bySection.map(s => `- ${s.name}: ${s.earned}/${s.total} points`).join('\n')}
+
+--- RÉPONSES DÉTAILLÉES ---
+${sections.map((section) => {
+    return `\n[${section.title}]\n${section.questions.map(q => {
+        const answer = responses[q.id];
+        return `Q: ${q.label}\nR: ${answer || 'Non répondu'}`;
+    }).join('\n\n')}`;
+}).join('\n')}
+                `.trim();
+            };
+
+            const copyToClipboard = async (scoreData) => {
+                const text = generateReportText(scoreData);
+                try {
+                    await navigator.clipboard.writeText(text);
+                    setCopySuccess(true);
+                    setTimeout(() => setCopySuccess(false), 3000);
+                } catch (err) {
+                    console.error('Erreur de copie', err);
+                    alert('Impossible de copier automatiquement. Veuillez faire une capture d\'écran.');
+                }
+            };
+
+            const openMailClient = (scoreData) => {
+                const subject = encodeURIComponent(`Test de positionnement - ${responses.nom || 'Candidat'}`);
+                const body = encodeURIComponent(generateReportText(scoreData));
+                window.location.href = `mailto:olivier.chevalier@mfr.asso.fr?subject=${subject}&body=${body}`;
+            };
+
+            const handleInputChange = (questionId, value) => {
+                setResponses(prev => ({
+                    ...prev,
+                    [questionId]: value
+                }));
+            };
+
+            const handleSubmit = () => {
+                const calculatedScore = calculateScore();
+                setScore(calculatedScore);
+                setSubmitted(true);
+            };
+
+            if (submitted && score) {
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-6">
+                        <div className="bg-white rounded-lg shadow-xl p-8 max-w-2xl w-full">
+                            <div className="text-center mb-6">
+                                <Award className="w-20 h-20 text-yellow-500 mx-auto mb-4" />
+                                <h2 className="text-3xl font-bold text-gray-800 mb-2">Évaluation Terminée !</h2>
+                                <p className="text-gray-600">Voici vos résultats détaillés</p>
+                            </div>
+
+                            <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg p-6 mb-6 text-center">
+                                <div className="text-5xl font-bold mb-2">{score.percentage}%</div>
+                                <div className="text-xl mb-2">{score.earned} / {score.total} points</div>
+                                <div className={`inline-block px-4 py-2 rounded-full ${score.level.bg} ${score.level.color} font-semibold mt-2`}>
+                                    Niveau : {score.level.name}
+                                </div>
+                            </div>
+
+                            <div className="mb-8">
+                                <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                                    <TrendingUp className="w-5 h-5 mr-2" />
+                                    Résultats par section
+                                </h3>
+                                <div className="space-y-3">
+                                    {score.details.bySection.map((section, idx) => (
+                                        <div key={idx} className="border border-gray-200 rounded-lg p-4">
+                                            <div className="flex justify-between items-center mb-2">
+                                                <span className="font-medium text-gray-700">{section.name}</span>
+                                                <span className="text-sm font-semibold text-blue-600">
+                                                    {section.earned} / {section.total} pts
+                                                </span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                                <div
+                                                    className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                                                    style={{ width: `${(section.earned / section.total) * 100}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6">
+                                <h4 className="font-bold text-gray-800 mb-3 flex items-center">
+                                    <Mail className="w-5 h-5 mr-2 text-blue-600" />
+                                    Envoyer mes résultats
+                                </h4>
+                                <p className="text-sm text-gray-600 mb-4">
+                                    Veuillez choisir une option pour transmettre vos résultats à M. Chevalier :
+                                </p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <button
+                                        onClick={() => copyToClipboard(score)}
+                                        className={`flex items-center justify-center px-4 py-3 rounded-lg border-2 transition-all ${
+                                            copySuccess
+                                                ? "border-green-500 bg-green-50 text-green-700"
+                                                : "border-gray-300 hover:border-blue-500 hover:bg-blue-50 text-gray-700"
+                                        }`}
+                                    >
+                                        {copySuccess ? (
+                                            <>
+                                                <CheckCircle className="w-5 h-5 mr-2" />
+                                                Copié !
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Copy className="w-5 h-5 mr-2" />
+                                                1. Copier le résumé
+                                            </>
+                                        )}
+                                    </button>
+
+                                    <button
+                                        onClick={() => openMailClient(
